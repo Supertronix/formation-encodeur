@@ -68,7 +68,7 @@ public class RobotControleur extends IterativeRobot {
 		pidDistance.setSetpoint(distance);	
 	}
 	
-	public boolean estArriveSelonPID()
+	public boolean estArriveSelonEncodeur()
 	{
 		return pidDistance.onTarget();
 	}		
@@ -119,7 +119,7 @@ public class RobotControleur extends IterativeRobot {
 	@Override
 	public void autonomousPeriodic() {
 		System.out.println("autonomousPeriodic()");
-		if(!estArriveSelonPID())
+		if(!estArriveSelonEncodeur())
 		{
 			roueAvantGauche.set(distanceSortiePID.getPIDOut());
 			roueAvantDroite.set(distanceSortiePID.getPIDOut());
