@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSourceType;
+import edu.wpi.first.wpilibj.VictorSP;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -39,11 +40,39 @@ public class RobotControleur extends IterativeRobot {
 	public static final boolean INVERSION_ROUE_ENCODEUR = true;
 	public static final float ENCODEUR_ROUE_DISTANCE_PULSION = 0.0085f;	
 	
+	// PWM Outputs
+	public static final int ROUE_AVANT_GAUCHE = 10; // SP 1
+	public static final int ROUE_ARRIERE_GAUCHE = 14; // SP 2
+	public static final int ROUE_AVANT_DROIT= 13; // SP 3
+	public static final int ROUE_ARRIERE_DROIT = 17; // SP 4
+	
+	public static final boolean INVERSION_ROUE_AVANT_GAUCHE = true;
+	public static final boolean INVERSION_ROUE_ARRIERE_GAUCHE = true;
+	public static final boolean INVERSION_ROUE_AVANT_DROIT = false;
+	public static final boolean INVERSION_ROUE_ARRIERE_DROIT= false;	
+	
 	Encoder encodeurRoues;	
 	
 	PIDController pidDistance;
-	SortiePID distancePIDOut;
+	SortiePID distanceSortiePID;
+	
+    VictorSP roueAvantGauche; 
+	VictorSP roueArriereGauche; 
+	VictorSP roueAvantDroite; 
+	VictorSP roueArriereDroite; 
+	
 
+	public void programmerDistance(double distance) {
+		pidDistance.reset();
+		pidDistance.enable();
+		pidDistance.setSetpoint(distance);	
+	}
+	
+	public boolean estArriveSelonPID()
+	{
+		return pidDistance.onTarget();
+	}		
+	
 	
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -58,11 +87,21 @@ public class RobotControleur extends IterativeRobot {
 		 encodeurRoues.setDistancePerPulse(ENCODEUR_ROUE_DISTANCE_PULSION);
 		 encodeurRoues.setPIDSourceType(PIDSourceType.kDisplacement);
 		 
-		 distancePIDOut = new SortiePID();
-		 pidDistance = new PIDController(DISTANCE_KP, DISTANCE_KI, 0, encodeurRoues, distancePIDOut);
+		 distanceSortiePID = new SortiePID();
+		 pidDistance = new PIDController(DISTANCE_KP, DISTANCE_KI, 0, encodeurRoues, distanceSortiePID);
 		 pidDistance.setSetpoint(0);
 		 pidDistance.setAbsoluteTolerance(DISTANCE_TOLERANCE);
 		 pidDistance.enable();
+		 
+		roueAvantGauche = new VictorSP(ROUE_AVANT_GAUCHE);
+		roueArriereGauche = new VictorSP(ROUE_ARRIERE_GAUCHE);
+		roueAvantDroite = new VictorSP(ROUE_AVANT_DROIT);
+		roueArriereDroite = new VictorSP(ROUE_ARRIERE_DROIT);
+		 	
+		roueAvantGauche.setInverted(INVERSION_ROUE_AVANT_GAUCHE); // TRUE
+		roueArriereGauche.setInverted(INVERSION_ROUE_ARRIERE_GAUCHE); // TRUE
+		roueAvantDroite.setInverted(INVERSION_ROUE_AVANT_DROIT);
+		roueArriereDroite.setInverted(INVERSION_ROUE_ARRIERE_DROIT);
 	}
 
 	/**
@@ -71,6 +110,7 @@ public class RobotControleur extends IterativeRobot {
 	@Override
 	public void autonomousInit() {
 		System.out.println("autonomousInit()");
+		programmerDistance(2);
 	}
 
 	/**
@@ -79,6 +119,13 @@ public class RobotControleur extends IterativeRobot {
 	@Override
 	public void autonomousPeriodic() {
 		System.out.println("autonomousPeriodic()");
+		if(!estArriveSelonPID())
+		{
+			roueAvantGauche.set(distanceSortiePID.getPIDOut());
+			roueAvantDroite.set(distanceSortiePID.getPIDOut());
+			roueArriereGauche.set(distanceSortiePID.getPIDOut());
+			roueArriereDroite.set(distanceSortiePID.getPIDOut());
+		}
 	}
 
 	/**
