@@ -1,6 +1,8 @@
 package org.usfirst.frc.equipe5910.robot;
 
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.PIDSourceType;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -11,6 +13,14 @@ import edu.wpi.first.wpilibj.IterativeRobot;
  */
 public class RobotControleur extends IterativeRobot {
 
+	public static final int ROUE_ENCODEUR_A = 0;  // bleu
+	public static final int ROUE_ENCODEUR_B = 1;  // jaune
+	
+	public static final boolean INVERSION_ROUE_ENCODEUR = true;
+	public static final float ENCODEUR_ROUE_DISTANCE_PULSION = 0.0085f;	
+	
+	Encoder encodeurRoues;	
+	
 	/**
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
@@ -19,6 +29,10 @@ public class RobotControleur extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		System.out.println("robotInit()");
+		 encodeurRoues = new Encoder(ROUE_ENCODEUR_A, ROUE_ENCODEUR_B);
+		 encodeurRoues.setReverseDirection(INVERSION_ROUE_ENCODEUR);
+		 encodeurRoues.setDistancePerPulse(ENCODEUR_ROUE_DISTANCE_PULSION);
+		 encodeurRoues.setPIDSourceType(PIDSourceType.kDisplacement);
 	}
 
 	/**
@@ -52,6 +66,7 @@ public class RobotControleur extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		System.out.println("teleopPeriodic()");
+		System.out.println("Valeur encodeur " + encodeurRoues.getDistance());
 	}
 
 	/**
